@@ -138,6 +138,8 @@ private:
     param_desc.integer_range[0].to_value = f_value.fMax;
     double exposure_time = this->declare_parameter("exposure_time", 5000, param_desc);
     MV_CC_SetFloatValue(camera_handle_, "ExposureTime", exposure_time);
+    RCLCPP_INFO(this->get_logger(), "Exposure time (min): %f", f_value.fMin);
+    RCLCPP_INFO(this->get_logger(), "Exposure time (max): %f", f_value.fMax);
     RCLCPP_INFO(this->get_logger(), "Exposure time: %f", exposure_time);
 
     // Gain
@@ -147,6 +149,8 @@ private:
     param_desc.integer_range[0].to_value = f_value.fMax;
     double gain = this->declare_parameter("gain", f_value.fCurValue, param_desc);
     MV_CC_SetFloatValue(camera_handle_, "Gain", gain);
+    RCLCPP_INFO(this->get_logger(), "Gain (min): %f", f_value.fMin);
+    RCLCPP_INFO(this->get_logger(), "Gain (max): %f", f_value.fMax);
     RCLCPP_INFO(this->get_logger(), "Gain: %f", gain);
   }
 
