@@ -17,6 +17,7 @@ find_package(fmt REQUIRED)
 
 include_directories(include)
 
+# 声明armor_detector可执行文件
 add_executable(armor_detector src/armordetectornode.cpp src/detector.cpp)
 
 ament_target_dependencies(armor_detector
@@ -29,13 +30,21 @@ ament_target_dependencies(armor_detector
 target_include_directories(armor_detector PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(armor_detector ${OpenCV_LIBS} fmt::fmt)
 
+# 部署armor_detector
 install(
   TARGETS armor_detector
   DESTINATION lib/${PROJECT_NAME}
 )
 
+# 部署文件夹
 install(
   DIRECTORY assets
+  DESTINATION share/${PROJECT_NAME}
+)
+
+# 部署零散文件
+install(
+  FILES tiny_resnet.onnx
   DESTINATION share/${PROJECT_NAME}
 )
 

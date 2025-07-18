@@ -16,10 +16,14 @@ class ArmorDetectorNode : public rclcpp::Node
 {
 public:
     ArmorDetectorNode()
-        : Node("armor_detector")
+        : Node("armor_detector"), 
+        m_pkgShareDir(ament_index_cpp::get_package_share_directory("armor_detector")),
+        m_detector(std::make_unique<Detector>(m_pkgShareDir))
     {
+        RCLCPP_INFO(get_logger(), "Starting armor_detector node!");
+
         m_camSub = image_transport::create_camera_subscription(
-            this, 
+            this,
             "image_raw",
             std::bind(&ArmorDetectorNode::subscriptionCallback, 
                 this, std::placeholders::_1, std::placeholders::_2),
@@ -29,8 +33,7 @@ public:
 #if DEBUG
         Detector detector;
         cv::VideoCapture video(
-            ament_index_cpp::get_package_share_directory("armor_detector") 
-            + "/assets/8radps.avi");
+            shareDir + "/assets/8radps.avi");
         while (true)
         {
             cv::Mat frame;
@@ -72,23 +75,34 @@ private:
             return;
         }
 
-        std::vector<Armor> armors = Detector().detect(frame);
+        if (frame.empty())
+        {
+            RCLCPP_INFO(get_logger(), "Null frame!");
+            return;
+        }
+
+        auto armors = m_detector->detect(frame);
+
+        RCLCPP_INFO(get_logger(), "%d armors detected.", armors.size());
 
         cv::Mat draw_armor = frame.clone();
-        int index = 0;
         for (const Armor& armor : armors)
         {
+            helpers::drawPoints(draw_armor, armor.points);
             helpers::drawText(
                 draw_armor,
-                fmt::format("armor{}", index++),
-                armor.center
+                fmt::format("{},{}({:.2f})", COLORS[armor.color], ARMOR_NAMES[armor.name], armor.confidence),
+                armor.left.top
             );
         }
-        /*cv::imshow("draw_armor", draw_armor);*/
+
+        cv::imshow("draw_armor", draw_armor);
         cv::waitKey(1);
     }
 
+    const std::string m_pkgShareDir;
     image_transport::CameraSubscriber m_camSub;
+    std::unique_ptr<Detector> m_detector;
 };
 
 int main(int argc, char** argv)
