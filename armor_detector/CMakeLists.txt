@@ -14,23 +14,31 @@ find_package(cv_bridge REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
+find_package(tf2 REQUIRED)
+find_package(armor_interface REQUIRED)
 
 include_directories(include)
 
 # 声明armor_detector可执行文件
-add_executable(armor_detector src/armordetectornode.cpp src/detector.cpp)
+add_executable(armor_detector 
+  src/armordetectornode.cpp 
+  src/detector.cpp 
+  src/pnpsolver.cpp
+)
 
 ament_target_dependencies(armor_detector
   rclcpp
   image_transport
   sensor_msgs
   cv_bridge
+  tf2
+  armor_interface
 )
 
 target_include_directories(armor_detector PRIVATE ${OpenCV_INCLUDE_DIRS})
 target_link_libraries(armor_detector ${OpenCV_LIBS} fmt::fmt)
 
-# 部署armor_detector
+# 部署可执行文件
 install(
   TARGETS armor_detector
   DESTINATION lib/${PROJECT_NAME}

@@ -5,17 +5,17 @@
 
 enum ArmorColor
 {
-    Red,
-    Blue,
+  Red,
+  Blue,
 };
-const std::vector<std::string> COLORS = {"red", "blue", "purple"};
+const std::vector<std::string> ARMOR_COLORS = { "red", "blue", "purple" };
 
 enum ArmorType
 {
-    Big,
-    Small
+  Big,
+  Small
 };
-const std::vector<std::string> ARMOR_TYPES = {"big", "small"};
+const std::vector<std::string> ARMOR_TYPES = { "big", "small" };
 
 enum ArmorName
 {
@@ -29,8 +29,8 @@ enum ArmorName
   base,
   not_armor
 };
-const std::vector<std::string> ARMOR_NAMES = {"one",    "two",     "three", "four",     "five",
-                                              "sentry", "outpost", "base",  "not_armor"};
+const std::vector<std::string> ARMOR_NAMES = { "one", "two", "three", "four", "five",
+                                               "sentry", "outpost", "base", "not_armor" };
 
 enum ArmorPriority
 {
@@ -43,43 +43,41 @@ enum ArmorPriority
 
 struct Lightbar
 {
-    ArmorColor color;
-    cv::Point2f center, top, bottom, top2bottom;
-    double angle, angleError, length, ratio;
+  ArmorColor color;
+  cv::Point2f center, top, bottom, top2bottom;
+  double angle, angleError, length, ratio;
 
-    Lightbar(const cv::RotatedRect& rect)
-    {
-        std::vector<cv::Point2f> corners(4);
-        rect.points(&corners[0]);
-        std::sort(corners.begin(), corners.end(), [](const cv::Point2f& a, const cv::Point2f& b)
-        {
-            return a.y < b.y;
-        });
+  Lightbar(const cv::RotatedRect &rect)
+  {
+    std::vector<cv::Point2f> corners(4);
+    rect.points(&corners[0]);
+    std::sort(corners.begin(), corners.end(), [](const cv::Point2f &a, const cv::Point2f &b)
+              { return a.y < b.y; });
 
-        center = rect.center;
-        top = (corners[0] + corners[1]) / 2;
-        bottom = (corners[2] + corners[3]) / 2;
-        top2bottom = bottom - top;
+    center = rect.center;
+    top = (corners[0] + corners[1]) / 2;
+    bottom = (corners[2] + corners[3]) / 2;
+    top2bottom = bottom - top;
 
-        auto width = cv::norm(corners[0] - corners[1]);
-        angle = std::atan2(top2bottom.y, top2bottom.x);
-        angleError = std::abs(angle - CV_PI / 2);
-        length = cv::norm(top2bottom);
-        ratio = length / width;
-    }
-};  
+    auto width = cv::norm(corners[0] - corners[1]);
+    angle = std::atan2(top2bottom.y, top2bottom.x);
+    angleError = std::abs(angle - CV_PI / 2);
+    length = cv::norm(top2bottom);
+    ratio = length / width;
+  }
+};
 
 struct Armor
 {
   ArmorColor color;
   const Lightbar left, right;
-  cv::Point2f center;       // 不是对角线交点，不能作为实际中心！
-  cv::Point2f center_norm;  // 归一化坐标
+  cv::Point2f center;      // 不是对角线交点，不能作为实际中心！
+  cv::Point2f center_norm; // 归一化坐标
   std::vector<cv::Point2f> points;
 
-  double ratio;              // 两灯条的中点连线与长灯条的长度之比
-  double side_ratio;         // 长灯条与短灯条的长度之比
-  double rectangular_error;  // 灯条和中点连线所成夹角与π/2的差值
+  double ratio;             // 两灯条的中点连线与长灯条的长度之比
+  double side_ratio;        // 长灯条与短灯条的长度之比
+  double rectangular_error; // 灯条和中点连线所成夹角与π/2的差值
 
   ArmorType type;
   ArmorName name;
@@ -88,9 +86,9 @@ struct Armor
   double confidence;
   bool duplicated;
 
-  double yaw_raw;  // rad
+  double yaw_raw; // rad
 
-  Armor(const Lightbar & left, const Lightbar & right) : left(left), right(right)
+  Armor(const Lightbar &left, const Lightbar &right) : left(left), right(right)
   {
     color = left.color;
     center = (left.center + right.center) / 2;
