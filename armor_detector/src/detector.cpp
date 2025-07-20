@@ -4,8 +4,9 @@
 using namespace cv;
 using namespace std;
 
-Detector::Detector(const string& pkgShareDir)
-    : m_pkgShareDir(pkgShareDir)
+Detector::Detector(const string& pkgShareDir, const DetectorConfig& config)
+    : m_pkgShareDir(pkgShareDir),
+      m_config(config)
 {
 }
 
@@ -17,7 +18,7 @@ vector<Armor> Detector::detect(const Mat& bgr)
 
   // 进行二值化
   cv::Mat binary_img;
-  cv::threshold(gray, binary_img, 120, 255, cv::THRESH_BINARY);
+  cv::threshold(gray, binary_img, m_config.binary_thres, 255, cv::THRESH_BINARY);
 
   // 获取轮廓点
   std::vector<std::vector<cv::Point>> contours;
@@ -53,7 +54,7 @@ vector<Armor> Detector::detect(const Mat& bgr)
       armor.pattern = getPattern(bgr, armor);
 
       classify(armor);
-      /*if (!checkName(armor)) continue;*/
+      if (!checkName(armor)) continue;
 
       armors.emplace_back(armor);
     }
@@ -78,8 +79,9 @@ ArmorColor Detector::getArmorColor(const cv::Mat& bgr, const std::vector<cv::Poi
 
 bool Detector::checkGeometry(const Lightbar& lightbar)
 {
-    bool ratioOk = 2.0 <= lightbar.ratio && lightbar.ratio <= 20;
-    bool angleOk = (lightbar.angleError * 57.3) < 45;
+    bool ratioOk = m_config.lightbar_min_ratio <= lightbar.ratio
+      && lightbar.ratio <= m_config.lightbar_max_ratio;
+    bool angleOk = (lightbar.angleError * 57.3) < m_config.lightbar_angle;
     bool lengthOk = lightbar.length > 8;
     return ratioOk && angleOk && lengthOk;
 }

@@ -17,8 +17,7 @@ class ArmorDetectorNode : public rclcpp::Node
 public:
     ArmorDetectorNode()
         : Node("armor_detector"), 
-        m_pkgShareDir(ament_index_cpp::get_package_share_directory("armor_detector")),
-        m_detector(std::make_unique<Detector>(m_pkgShareDir))
+        m_pkgShareDir(ament_index_cpp::get_package_share_directory("armor_detector"))
     {
         RCLCPP_INFO(get_logger(), "Starting armor_detector node!");
 
@@ -29,6 +28,16 @@ public:
                 this, std::placeholders::_1, std::placeholders::_2),
             "raw"
         );
+
+        // init detector
+        DetectorConfig detector_config;
+        {
+            detector_config.binary_thres = declare_parameter("binary_thres", 120);
+            detector_config.lightbar_min_ratio = declare_parameter("lightbar_min_ratio", 2.0);
+            detector_config.lightbar_max_ratio = declare_parameter("lightbar_max_ratio", 20.0);
+            detector_config.lightbar_angle = declare_parameter("lightbar_angle", 40.0);
+        }
+        m_detector = std::make_unique<Detector>(m_pkgShareDir, detector_config);
 
 #if DEBUG
         Detector detector;

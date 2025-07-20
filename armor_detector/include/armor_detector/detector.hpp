@@ -5,10 +5,20 @@
 
 #include "armor.hpp"
 
+struct DetectorConfig
+{
+    int binary_thres;
+    /* 灯条高宽比 */
+    double lightbar_min_ratio;
+    double lightbar_max_ratio;
+    /* 灯条角度 */
+    double lightbar_angle;
+};
+
 class Detector
 {
 public:
-    Detector(const std::string& pkgShareDir);
+    Detector(const std::string& pkgShareDir, const DetectorConfig& config);
     std::vector<Armor> detect(const cv::Mat& frame);
 
 private:
@@ -20,6 +30,7 @@ private:
     void classify(Armor& armor);
 
     const std::string m_pkgShareDir;
+    const DetectorConfig m_config;
 };
 
 #endif
