@@ -15,6 +15,8 @@ find_package(OpenCV REQUIRED)
 find_package(ament_index_cpp REQUIRED)
 find_package(fmt REQUIRED)
 find_package(tf2 REQUIRED)
+find_package(tf2_ros REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(armor_interface REQUIRED)
 
 include_directories(include)
@@ -32,6 +34,8 @@ ament_target_dependencies(armor_detector
   sensor_msgs
   cv_bridge
   tf2
+  tf2_ros
+  tf2_geometry_msgs
   armor_interface
 )
 

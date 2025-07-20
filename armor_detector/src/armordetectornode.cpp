@@ -16,8 +16,10 @@ ArmorDetectorNode::ArmorDetectorNode()
 {
     RCLCPP_INFO(get_logger(), "Starting armor_detector node!");
 
+    // 初始化装甲板发布器
     m_armorsPub = this->create_publisher<armor_interface::msg::Armors>("/detector/armors", rclcpp::SensorDataQoS());
 
+    // 初始化相机图像&参数订阅器
     m_camSub = image_transport::create_camera_subscription(
         this,
         "image_raw",
@@ -26,7 +28,7 @@ ArmorDetectorNode::ArmorDetectorNode()
         "raw"
     );
 
-    // init detector
+    // 初始化Detector
     DetectorConfig detector_config;
     {
         detector_config.binary_thres = declare_parameter("binary_thres", 120);
@@ -35,6 +37,9 @@ ArmorDetectorNode::ArmorDetectorNode()
         detector_config.lightbar_angle = declare_parameter("lightbar_angle", 40.0);
     }
     m_detector = std::make_unique<Detector>(m_pkgShareDir, detector_config);
+
+    // 初始化装甲板tf播报器
+    m_armorBroadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(this);
 
 #if DEBUG
     Detector detector;
@@ -102,9 +107,11 @@ void ArmorDetectorNode::cameraSubscriptionCallback(sensor_msgs::msg::Image::Cons
 
     if (m_pnpSolver)
     {
-        // 收集装甲板位姿信息并发布
+        // 收集 装甲板位姿信息 & tf坐标变换，并发布
         m_armorsMsg.header = image->header;
         m_armorsMsg.data.clear();
+        m_armorTransforms.clear();
+        int index = 0;
         for (const auto& armor : armors)
         {
             armor_interface::msg::Armor armorMsg;
@@ -142,13 +149,26 @@ void ArmorDetectorNode::cameraSubscriptionCallback(sensor_msgs::msg::Image::Cons
                 armorMsg.pose.orientation.z = tf2q.z();
                 armorMsg.pose.orientation.w = tf2q.w();
 
+                // 构建TransformStamped坐标变换
+                geometry_msgs::msg::TransformStamped stamped;
+                stamped.header = image->header;
+                stamped.child_frame_id = fmt::format("armor_{}_frame", index + 1);
+                stamped.transform.translation.x = tvec.at<double>(0);
+                stamped.transform.translation.y = tvec.at<double>(1);
+                stamped.transform.translation.z = tvec.at<double>(2);
+                stamped.transform.rotation = armorMsg.pose.orientation;
+
                 m_armorsMsg.data.emplace_back(armorMsg);
+                m_armorTransforms.emplace_back(stamped);
             }
             else
                 RCLCPP_WARN(get_logger(), "PnP failed!");
+
+            index++;
         }
     
         m_armorsPub->publish(m_armorsMsg);
+        m_armorBroadcaster->sendTransform(m_armorTransforms);
     }
 
     cv::Mat draw_armor = frame.clone();

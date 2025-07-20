@@ -5,6 +5,8 @@
 #include <image_transport/image_transport.hpp>
 #include <sensor_msgs/msg/image.hpp>
 #include <sensor_msgs/msg/camera_info.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <tf2_ros/transform_broadcaster.h>
 #include <opencv2/opencv.hpp>
 
 #include "detector.hpp"
@@ -30,6 +32,9 @@ private:
     bool m_camInfoInitialized;
 
     armor_interface::msg::Armors m_armorsMsg;
+
+    std::unique_ptr<tf2_ros::TransformBroadcaster> m_armorBroadcaster;
+    std::vector<geometry_msgs::msg::TransformStamped> m_armorTransforms;
 };
 
 #endif
