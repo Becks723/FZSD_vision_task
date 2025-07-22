@@ -10,7 +10,7 @@ Detector::Detector(const string& pkgShareDir, const DetectorConfig& config)
 {
 }
 
-vector<Armor> Detector::detect(const Mat& bgr)
+std::list<Armor> Detector::detect(const Mat& bgr)
 {
     // 转灰度图
     Mat gray;
@@ -42,7 +42,7 @@ vector<Armor> Detector::detect(const Mat& bgr)
   lightbars.sort([](const Lightbar & a, const Lightbar & b) { return a.center.x < b.center.x; });
 
   // 获取装甲板
-  std::vector<Armor> armors;
+  std::list<Armor> armors;
 
   for (auto left = lightbars.begin(); left != lightbars.end(); left++) {
     for (auto right = std::next(left); right != lightbars.end(); right++) {

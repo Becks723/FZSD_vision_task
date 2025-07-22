@@ -19,7 +19,7 @@ class Detector
 {
 public:
     Detector(const std::string& pkgShareDir, const DetectorConfig& config);
-    std::vector<Armor> detect(const cv::Mat& frame);
+    std::list<Armor> detect(const cv::Mat& frame);
 
 private:
     bool checkGeometry(const Lightbar& lightbar);
