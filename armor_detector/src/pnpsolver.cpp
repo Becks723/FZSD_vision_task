@@ -3,7 +3,7 @@
 PnPSolver::PnPSolver(sensor_msgs::msg::CameraInfo::ConstSharedPtr cameraInfo)
 {
     const double ARMOR_WIDTH = 140 / 1000.0;  // 单位: m
-    const double ARMOR_HEIGHT = 125 / 1000.0;
+    const double ARMOR_HEIGHT = 125 / 1000.0;   // TODO: 高度应是实际灯条的长度，而不是整个装甲板的高度
 
     // 相对于电脑显示屏：z向前 x向右 y向下
     // 从左上开始 顺时针

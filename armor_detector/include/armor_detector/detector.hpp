@@ -5,6 +5,9 @@
 
 #include "armor.hpp"
 
+/**
+ * @brief 供识别使用的参数
+ */
 struct DetectorConfig
 {
     int binary_thres;
@@ -15,6 +18,9 @@ struct DetectorConfig
     double lightbar_angle;
 };
 
+/**
+ * @brief 装甲板识别逻辑
+ */
 class Detector
 {
 public:

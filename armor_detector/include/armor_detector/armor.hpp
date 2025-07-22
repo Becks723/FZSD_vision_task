@@ -3,6 +3,9 @@
 
 #include <opencv2/opencv.hpp>
 
+/**
+ * @brief 灯条颜色
+ */
 enum ArmorColor
 {
   Red,
@@ -41,11 +44,14 @@ enum ArmorPriority
   fifth
 };
 
+/**
+ * @brief 灯条
+ */
 struct Lightbar
 {
   ArmorColor color;
-  cv::Point2f center, top, bottom, top2bottom;
-  double angle, angleError, length, ratio;
+  cv::Point2f center, top, bottom, top2bottom;  // 像素坐标系下灯条（可看作一条竖线）的中心、顶部、底部坐标，以及从顶到底的响亮
+  double angle, angleError, length, ratio;  // （弧度制）角度、（弧度制）角度偏差、长度、长度与宽度之比
 
   Lightbar(const cv::RotatedRect &rect)
   {
@@ -67,12 +73,15 @@ struct Lightbar
   }
 };
 
+/**
+ * @brief 装甲板
+ */
 struct Armor
 {
   ArmorColor color;
-  const Lightbar left, right;
-  cv::Point2f center;      // 不是对角线交点，不能作为实际中心！
-  cv::Point2f center_norm; // 归一化坐标
+  const Lightbar left, right; // 左右两个灯条
+  cv::Point2f center;         // 不是对角线交点，不能作为实际中心！
+  cv::Point2f center_norm;    // 归一化坐标
   std::vector<cv::Point2f> points;
 
   double ratio;             // 两灯条的中点连线与长灯条的长度之比

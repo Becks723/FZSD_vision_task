@@ -7,8 +7,6 @@
 #include "armor_detector/armordetectornode.hpp"
 #include "armor_detector/helpers.hpp"
 
-#define DEBUG 0
-
 ArmorDetectorNode::ArmorDetectorNode()
     : Node("armor_detector"),
       m_pkgShareDir(ament_index_cpp::get_package_share_directory("armor_detector")),
@@ -52,35 +50,6 @@ ArmorDetectorNode::ArmorDetectorNode()
 
     // 初始化装甲板tf播报器
     m_armorBroadcaster = std::make_unique<tf2_ros::TransformBroadcaster>(this);
-
-#if DEBUG
-    Detector detector;
-    cv::VideoCapture video(
-        shareDir + "/assets/8radps.avi");
-    while (true)
-    {
-        cv::Mat frame;
-        video >> frame;
-
-        auto armors = detector.detect(frame);
-
-        cv::Mat draw_armor = frame.clone();
-        int index = 0;
-        for (const Armor& armor : armors)
-        {
-            helpers::drawText(
-                draw_armor,
-                fmt::format("armor{}", index++),
-                armor.center
-            );
-        }
-        cv::imshow("draw_armor", draw_armor);
-        auto key = cv::waitKey(25);
-        if (key == 'q')
-            break;
-    }
-    return;
-#endif
 }
 
 void ArmorDetectorNode::imageSubscriptionCallback(sensor_msgs::msg::Image::ConstSharedPtr image)

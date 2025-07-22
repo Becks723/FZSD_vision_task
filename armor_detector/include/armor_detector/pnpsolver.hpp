@@ -8,6 +8,9 @@
 
 #include "armor.hpp"
 
+/**
+ * @brief 解算PnP逻辑
+ */
 class PnPSolver
 {
 public:
