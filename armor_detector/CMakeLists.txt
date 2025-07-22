@@ -48,12 +48,6 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
-# 部署文件夹
-install(
-  DIRECTORY assets
-  DESTINATION share/${PROJECT_NAME}
-)
-
 # 部署零散文件
 install(
   FILES tiny_resnet.onnx
