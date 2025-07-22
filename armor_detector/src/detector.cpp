@@ -51,6 +51,7 @@ vector<Armor> Detector::detect(const Mat& bgr)
       auto armor = Armor(*left, *right);
       if (!checkGeometry(armor)) continue;
 
+      armor.type = ArmorType::Small;
       armor.pattern = getPattern(bgr, armor);
 
       classify(armor);
