@@ -21,11 +21,11 @@ public:
     ArmorDetectorNode();
 
 private:
-    void cameraSubscriptionCallback(sensor_msgs::msg::Image::ConstSharedPtr image,
-        sensor_msgs::msg::CameraInfo::ConstSharedPtr info);
-
+    void imageSubscriptionCallback(sensor_msgs::msg::Image::ConstSharedPtr image);
+    
     const std::string m_pkgShareDir;
-    image_transport::CameraSubscriber m_camSub;
+    rclcpp::Subscription<sensor_msgs::msg::Image>::SharedPtr m_imgSub;
+    rclcpp::Subscription<sensor_msgs::msg::CameraInfo>::SharedPtr m_camSub;
     rclcpp::Publisher<armor_interface::msg::Armors>::SharedPtr m_armorsPub;
     std::unique_ptr<Detector> m_detector;
     std::unique_ptr<PnPSolver> m_pnpSolver;

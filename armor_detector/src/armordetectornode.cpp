@@ -19,13 +19,25 @@ ArmorDetectorNode::ArmorDetectorNode()
     // 初始化装甲板发布器
     m_armorsPub = this->create_publisher<armor_interface::msg::Armors>("/detector/armors", rclcpp::SensorDataQoS());
 
-    // 初始化相机图像&参数订阅器
-    m_camSub = image_transport::create_camera_subscription(
-        this,
-        "image_raw",
-        std::bind(&ArmorDetectorNode::cameraSubscriptionCallback, 
-            this, std::placeholders::_1, std::placeholders::_2),
-        "raw"
+    // 初始化/image_raw话题订阅器
+    m_imgSub = this->create_subscription<sensor_msgs::msg::Image>(
+        "/image_raw",
+        rclcpp::SensorDataQoS(),
+        std::bind(&ArmorDetectorNode::imageSubscriptionCallback, this, std::placeholders::_1)
+    );
+
+    // 初始化/camera_info话题订阅器
+    m_camSub = this->create_subscription<sensor_msgs::msg::CameraInfo>(
+        "/camera_info",
+        rclcpp::SensorDataQoS(),
+        [this](sensor_msgs::msg::CameraInfo::ConstSharedPtr info) {
+            if (!m_camInfoInitialized)
+            {
+                m_camInfoInitialized = true;
+                m_pnpSolver = std::make_unique<PnPSolver>(info);
+                RCLCPP_INFO(get_logger(), "Camera info initialized!");
+            }
+        }
     );
 
     // 初始化Detector
@@ -71,17 +83,8 @@ ArmorDetectorNode::ArmorDetectorNode()
 #endif
 }
 
-void ArmorDetectorNode::cameraSubscriptionCallback(sensor_msgs::msg::Image::ConstSharedPtr image, 
-    sensor_msgs::msg::CameraInfo::ConstSharedPtr info)
+void ArmorDetectorNode::imageSubscriptionCallback(sensor_msgs::msg::Image::ConstSharedPtr image)
 {
-    // 初始化相机参数和PnP
-    if (!m_camInfoInitialized)
-    {
-        m_camInfoInitialized = true;
-        m_pnpSolver = std::make_unique<PnPSolver>(info);
-        RCLCPP_INFO(get_logger(), "Camera info initialized!");
-    }
-
     // 通过cv_bridge将 sensor_msgs的image 转成 opencv的Mat
     cv::Mat frame;
     try
